@@ -670,7 +670,27 @@ async def get_feedback(usuario_id: str):
 
 @api_router.post("/seed")
 async def seed_data():
-    # Check if data already exists
+    # Always ensure demo professor exists
+    professor_exists = await db.usuarios.find_one({"nome": "Professor Demo", "tipo": "professor"})
+    if not professor_exists:
+        professor = {
+            "id": str(uuid.uuid4()),
+            "nome": "Professor Demo",
+            "tipo": "professor",
+            "turma": "",
+            "matricula": "",
+            "senha_hash": hash_password("123456"),
+            "pontuacao_total": 0,
+            "acertos": 0,
+            "erros": 0,
+            "tempo_total": 0,
+            "atividades_concluidas": 0,
+            "sequencia_acertos": 0,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.usuarios.insert_one(professor)
+    
+    # Check if materials already exist
     count = await db.materiais.count_documents({})
     if count > 0:
         return {"message": "Dados já existem", "materiais": count}
@@ -694,26 +714,6 @@ async def seed_data():
         m["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     await db.materiais.insert_many(materiais_demo)
-    
-    # Create demo professor
-    professor_exists = await db.usuarios.find_one({"nome": "Professor Demo", "tipo": "professor"})
-    if not professor_exists:
-        professor = {
-            "id": str(uuid.uuid4()),
-            "nome": "Professor Demo",
-            "tipo": "professor",
-            "turma": "",
-            "matricula": "",
-            "senha_hash": hash_password("123456"),
-            "pontuacao_total": 0,
-            "acertos": 0,
-            "erros": 0,
-            "tempo_total": 0,
-            "atividades_concluidas": 0,
-            "sequencia_acertos": 0,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.usuarios.insert_one(professor)
     
     return {"message": "Dados de demonstração criados com sucesso", "materiais": len(materiais_demo)}
 

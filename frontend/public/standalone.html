@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logi3A Soluções - Simulador Educacional</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0052CC;
+            --primary-light: #E6F0FF;
+            --secondary: #0F172A;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --background: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #0F172A;
+            --muted: #64748B;
+            --border: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Chivo', sans-serif;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .logo-text p {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Page sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--background) 100%);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0, 82, 204, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0047B3;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .card-hover:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(0, 82, 204, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon.primary { background: var(--primary); color: white; }
+        .card-icon.secondary { background: var(--secondary); color: white; }
+        .card-icon.success { background: var(--success); color: white; }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Scanner */
+        .scanner-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #qr-reader {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .scanner-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary-light);
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--warning);
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Result */
+        .result-card {
+            border: 2px solid var(--success);
+            margin-top: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--success);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .result-item {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .result-item label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-item p {
+            font-weight: 500;
+        }
+
+        /* Select */
+        .select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .select-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        select, input, textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: white;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-recebimento { background: #dbeafe; color: #1e40af; }
+        .badge-expedicao { background: #dcfce7; color: #166534; }
+        .badge-estoque { background: #fef3c7; color: #92400e; }
+        .badge-reversa { background: #fce7f3; color: #9d174d; }
+        .badge-identificacao { background: #e0e7ff; color: #3730a3; }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        tr:hover {
+            background: rgba(0, 82, 204, 0.02);
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Action buttons row */
+        .action-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--error); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">📦</div>
+                <div class="logo-text">
+                    <h1>Logi3A Soluções</h1>
+                    <p>EE Profª Elídia Tedesco de Oliveira</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-page="home">Início</button>
+                <button class="nav-btn" data-page="scanner-qr">QR Code</button>
+                <button class="nav-btn" data-page="scanner-barcode">Código Barras</button>
+                <button class="nav-btn" data-page="historico">Histórico</button>
+                <button class="nav-btn" data-page="materiais">Materiais</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <span class="hero-badge">✨ Simulador Educacional</span>
+                <h1>Bem-vindo ao <span>Logi3A Soluções</span></h1>
+                <p>Aprenda como funciona a leitura de QR Code e código de barras em centros de distribuição e logística.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="navigateTo('scanner-qr')">
+                        📷 Começar Agora
+                    </button>
+                    <button class="btn btn-outline" onclick="navigateTo('historico')">
+                        📋 Ver Histórico
+                    </button>
+                </div>
+            </div>
+
+            <section class="section">
+                <h2 class="section-title">Ações Principais</h2>
+                <div class="grid grid-3">
+                    <div class="card card-hover" onclick="navigateTo('scanner-qr')">
+                        <div class="card-icon primary">📷</div>
+                        <h3 class="card-title">Ler QR Code</h3>
+                        <p style="color: var(--muted)">Escaneie QR Codes com a câmera</p>
+                    </div>
+                    <div class="card card-hover" onclick="navigateTo('scanner-barcode')">
+                        <div class="card-icon secondary">📊</div>
+                        <h3 class="card-title">Ler Código de Barras</h3>
+                        <p style="color: var(--muted)">Escaneie códigos de barras tradicionais</p>
+                    </div>
+                    <div class="card card-hover" onclick="navigateTo('historico')">
+                        <div class="card-icon success">📋</div>
+                        <h3 class="card-title">Ver Histórico</h3>
+                        <p style="color: var(--muted)">Consulte todas as leituras realizadas</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title">Estatísticas</h2>
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Total de Leituras</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="stat-qr">0</div>
+                        <div class="stat-label">QR Codes</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="stat-barcode">0</div>
+                        <div class="stat-label">Códigos de Barras</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value" id="stat-materiais">0</div>
+                        <div class="stat-label">Materiais</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Scanner QR Page -->
+        <div id="scanner-qr" class="page">
+            <div class="back-btn" onclick="navigateTo('home')">← Voltar</div>
+            <div class="scanner-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Leitor de QR Code</h2>
+                        <p style="color: var(--muted)">Aponte a câmera para o QR Code</p>
+                    </div>
+                    <div class="scanner-controls">
+                        <div class="select-group" style="flex: 1">
+                            <label>Tipo de Operação</label>
+                            <select id="operacao-qr">
+                                <option value="Identificação">Identificação</option>
+                                <option value="Recebimento">Recebimento</option>
+                                <option value="Expedição">Expedição</option>
+                                <option value="Estoque">Estoque</option>
+                                <option value="Logística Reversa">Logística Reversa</option>
+                            </select>
+                        </div>
+                        <div class="scanner-status">
+                            <span class="status-dot" id="status-qr"></span>
+                            <span id="status-text-qr">Câmera inativa</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startQRScanner()" id="start-qr-btn">
+                        📷 Iniciar Câmera
+                    </button>
+                    <button class="btn btn-danger" onclick="stopQRScanner()" id="stop-qr-btn" style="display: none;">
+                        ⏹️ Parar
+                    </button>
+                    <div id="qr-reader-container" style="margin-top: 1rem;"></div>
+                </div>
+                <div id="result-qr" class="card result-card" style="display: none;">
+                    <div class="result-header">
+                        <div class="result-icon">✓</div>
+                        <div>
+                            <h3 style="color: var(--success)">Leitura Realizada!</h3>
+                            <p style="color: var(--muted)" id="result-message-qr">Operação registrada</p>
+                        </div>
+                    </div>
+                    <div class="result-grid" id="result-data-qr"></div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="resetQRScanner()">🔄 Nova Leitura</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanner Barcode Page -->
+        <div id="scanner-barcode" class="page">
+            <div class="back-btn" onclick="navigateTo('home')">← Voltar</div>
+            <div class="scanner-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Leitor de Código de Barras</h2>
+                        <p style="color: var(--muted)">Aponte a câmera para o código de barras</p>
+                    </div>
+                    <div class="scanner-controls">
+                        <div class="select-group" style="flex: 1">
+                            <label>Tipo de Operação</label>
+                            <select id="operacao-barcode">
+                                <option value="Identificação">Identificação</option>
+                                <option value="Recebimento">Recebimento</option>
+                                <option value="Expedição">Expedição</option>
+                                <option value="Estoque">Estoque</option>
+                                <option value="Logística Reversa">Logística Reversa</option>
+                            </select>
+                        </div>
+                        <div class="scanner-status">
+                            <span class="status-dot" id="status-barcode"></span>
+                            <span id="status-text-barcode">Câmera inativa</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="startBarcodeScanner()" id="start-barcode-btn">
+                        📷 Iniciar Câmera
+                    </button>
+                    <button class="btn btn-danger" onclick="stopBarcodeScanner()" id="stop-barcode-btn" style="display: none;">
+                        ⏹️ Parar
+                    </button>
+                    <div id="barcode-reader-container" style="margin-top: 1rem;"></div>
+                </div>
+                <div id="result-barcode" class="card result-card" style="display: none;">
+                    <div class="result-header">
+                        <div class="result-icon">✓</div>
+                        <div>
+                            <h3 style="color: var(--success)">Leitura Realizada!</h3>
+                            <p style="color: var(--muted)" id="result-message-barcode">Operação registrada</p>
+                        </div>
+                    </div>
+                    <div class="result-grid" id="result-data-barcode"></div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="resetBarcodeScanner()">🔄 Nova Leitura</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico Page -->
+        <div id="historico" class="page">
+            <div class="back-btn" onclick="navigateTo('home')">← Voltar</div>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Histórico de Leituras</h2>
+                    <p style="color: var(--muted)" id="historico-count">0 registros</p>
+                </div>
+                <div class="action-row">
+                    <input type="text" placeholder="Buscar..." id="search-historico" style="flex: 1; max-width: 300px;">
+                    <select id="filter-tipo">
+                        <option value="">Todos os tipos</option>
+                        <option value="qrcode">QR Code</option>
+                        <option value="barcode">Código de Barras</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 Exportar CSV</button>
+                    <button class="btn btn-danger btn-sm" onclick="clearHistorico()">🗑️ Limpar</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Código</th>
+                                <th>Produto</th>
+                                <th>Operação</th>
+                                <th>Setor</th>
+                                <th>Data/Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historico-table"></tbody>
+                    </table>
+                </div>
+                <div class="empty-state" id="historico-empty" style="display: none;">
+                    <p>Nenhuma leitura encontrada</p>
+                    <button class="btn btn-primary" onclick="navigateTo('scanner-qr')" style="margin-top: 1rem;">
+                        Fazer primeira leitura
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Materiais Page -->
+        <div id="materiais" class="page">
+            <div class="back-btn" onclick="navigateTo('home')">← Voltar</div>
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 class="card-title">Cadastro de Materiais</h2>
+                        <p style="color: var(--muted)" id="materiais-count">0 materiais</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openMaterialModal()">+ Novo Material</button>
+                </div>
+                <div class="action-row">
+                    <input type="text" placeholder="Buscar..." id="search-materiais" style="flex: 1; max-width: 300px;">
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Código</th>
+                                <th>Setor</th>
+                                <th>Quantidade</th>
+                                <th>Operação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materiais-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Material Modal -->
+    <div class="modal-overlay" id="material-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Novo Material</h2>
+            </div>
+            <form id="material-form">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Nome do Material *</label>
+                        <input type="text" id="mat-nome" placeholder="Ex: Parafuso M8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="mat-codigo" placeholder="Ex: 789456123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="mat-quantidade" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Setor *</label>
+                        <select id="mat-setor" required>
+                            <option value="">Selecione</option>
+                            <option value="Expedição">Expedição</option>
+                            <option value="Estoque A">Estoque A</option>
+                            <option value="Estoque B">Estoque B</option>
+                            <option value="Recebimento">Recebimento</option>
+                            <option value="Identificação">Identificação</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operação *</label>
+                        <select id="mat-operacao" required>
+                            <option value="">Selecione</option>
+                            <option value="Recebimento">Recebimento</option>
+                            <option value="Expedição">Expedição</option>
+                            <option value="Estoque">Estoque</option>
+                            <option value="Logística Reversa">Logística Reversa</option>
+                            <option value="Identificação">Identificação</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Localização</label>
+                        <input type="text" id="mat-localizacao" placeholder="Ex: Prateleira A3">
+                    </div>
+                    <div class="form-group full">
+                        <label>Descrição</label>
+                        <textarea id="mat-descricao" rows="2" placeholder="Descrição do material"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeMaterialModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // Storage keys
+        const STORAGE = {
+            LEITURAS: 'logi3a_leituras',
+            MATERIAIS: 'logi3a_materiais'
+        };
+
+        // Demo data
+        const DEMO_MATERIAIS = [
+            { id: '1', nome: 'Parafuso M8', codigo: '789456123', setor: 'Expedição', quantidade: 500, tipo_operacao: 'Expedição', descricao: 'Parafuso de aço galvanizado M8x30mm', localizacao: 'Prateleira A3' },
+            { id: '2', nome: 'Caixa de Papelão', codigo: '456789123', setor: 'Estoque A', quantidade: 200, tipo_operacao: 'Recebimento', descricao: 'Caixa 40x30x20cm', localizacao: 'Estoque A - Corredor 2' },
+            { id: '3', nome: 'Porca Sextavada', codigo: '321654987', setor: 'Estoque B', quantidade: 1000, tipo_operacao: 'Estoque', descricao: 'Porca M8 zincada', localizacao: 'Prateleira B1' },
+            { id: '4', nome: 'Fita Adesiva', codigo: '654321789', setor: 'Expedição', quantidade: 50, tipo_operacao: 'Expedição', descricao: 'Fita transparente 48mm', localizacao: 'Área de Embalagem' },
+            { id: '5', nome: 'Etiqueta Adesiva', codigo: '987321654', setor: 'Identificação', quantidade: 5000, tipo_operacao: 'Identificação', descricao: 'Etiqueta 100x50mm', localizacao: 'Almoxarifado' }
+        ];
+
+        // State
+        let leituras = JSON.parse(localStorage.getItem(STORAGE.LEITURAS) || '[]');
+        let materiais = JSON.parse(localStorage.getItem(STORAGE.MATERIAIS) || 'null') || DEMO_MATERIAIS;
+        let qrScanner = null;
+        let barcodeScanner = null;
+        let editingMaterialId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Save demo materiais if not exists
+            if (!localStorage.getItem(STORAGE.MATERIAIS)) {
+                saveMateriais();
+            }
+            
+            // Setup navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+            });
+
+            // Setup search/filter
+            document.getElementById('search-historico').addEventListener('input', renderHistorico);
+            document.getElementById('filter-tipo').addEventListener('change', renderHistorico);
+            document.getElementById('search-materiais').addEventListener('input', renderMateriais);
+
+            // Setup form
+            document.getElementById('material-form').addEventListener('submit', saveMaterial);
+
+            // Initial render
+            updateStats();
+        });
+
+        // Navigation
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(page).classList.add('active');
+            document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+
+            // Page specific actions
+            if (page === 'historico') renderHistorico();
+            if (page === 'materiais') renderMateriais();
+            if (page === 'home') updateStats();
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `${type === 'success' ? '✓' : '✕'} ${message}`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Play sound
+        function playSound(success = true) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = success ? 800 : 300;
+                gain.gain.value = 0.3;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+                if (success) {
+                    setTimeout(() => {
+                        const osc2 = ctx.createOscillator();
+                        osc2.connect(gain);
+                        osc2.frequency.value = 1000;
+                        osc2.start();
+                        osc2.stop(ctx.currentTime + 0.15);
+                    }, 100);
+                }
+            } catch (e) {}
+        }
+
+        // QR Scanner
+        function startQRScanner() {
+            const container = document.getElementById('qr-reader-container');
+            container.innerHTML = '<div id="qr-reader"></div>';
+            
+            document.getElementById('start-qr-btn').style.display = 'none';
+            document.getElementById('stop-qr-btn').style.display = 'inline-flex';
+            document.getElementById('status-qr').classList.add('active');
+            document.getElementById('status-text-qr').textContent = 'Câmera ativa';
+
+            qrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
+            qrScanner.render(onQRScanSuccess, () => {});
+        }
+
+        function stopQRScanner() {
+            if (qrScanner) {
+                qrScanner.clear();
+                qrScanner = null;
+            }
+            document.getElementById('qr-reader-container').innerHTML = '';
+            document.getElementById('start-qr-btn').style.display = 'inline-flex';
+            document.getElementById('stop-qr-btn').style.display = 'none';
+            document.getElementById('status-qr').classList.remove('active');
+            document.getElementById('status-text-qr').textContent = 'Câmera inativa';
+        }
+
+        function resetQRScanner() {
+            document.getElementById('result-qr').style.display = 'none';
+            startQRScanner();
+        }
+
+        function onQRScanSuccess(decodedText) {
+            playSound(true);
+            stopQRScanner();
+
+            const operacao = document.getElementById('operacao-qr').value;
+            const parsed = parseQRContent(decodedText);
+            
+            const leitura = {
+                id: Date.now().toString(),
+                codigo: parsed.codigo || decodedText,
+                produto: parsed.produto || 'Produto',
+                setor: parsed.setor || operacao,
+                quantidade: parseInt(parsed.quantidade) || 1,
+                tipo_operacao: operacao,
+                tipo_leitura: 'qrcode',
+                timestamp: new Date().toISOString()
+            };
+
+            saveLeitura(leitura);
+            showResult('qr', leitura);
+            showToast('QR Code lido com sucesso!');
+        }
+
+        // Barcode Scanner
+        function startBarcodeScanner() {
+            const container = document.getElementById('barcode-reader-container');
+            container.innerHTML = '<div id="barcode-reader"></div>';
+            
+            document.getElementById('start-barcode-btn').style.display = 'none';
+            document.getElementById('stop-barcode-btn').style.display = 'inline-flex';
+            document.getElementById('status-barcode').classList.add('active');
+            document.getElementById('status-text-barcode').textContent = 'Câmera ativa';
+
+            barcodeScanner = new Html5QrcodeScanner("barcode-reader", { 
+                fps: 10, 
+                qrbox: { width: 300, height: 150 },
+                formatsToSupport: [ 
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E
+                ]
+            });
+            barcodeScanner.render(onBarcodeScanSuccess, () => {});
+        }
+
+        function stopBarcodeScanner() {
+            if (barcodeScanner) {
+                barcodeScanner.clear();
+                barcodeScanner = null;
+            }
+            document.getElementById('barcode-reader-container').innerHTML = '';
+            document.getElementById('start-barcode-btn').style.display = 'inline-flex';
+            document.getElementById('stop-barcode-btn').style.display = 'none';
+            document.getElementById('status-barcode').classList.remove('active');
+            document.getElementById('status-text-barcode').textContent = 'Câmera inativa';
+        }
+
+        function resetBarcodeScanner() {
+            document.getElementById('result-barcode').style.display = 'none';
+            startBarcodeScanner();
+        }
+
+        function onBarcodeScanSuccess(decodedText) {
+            playSound(true);
+            stopBarcodeScanner();
+
+            const operacao = document.getElementById('operacao-barcode').value;
+            const material = materiais.find(m => m.codigo === decodedText);
+            
+            const leitura = {
+                id: Date.now().toString(),
+                codigo: decodedText,
+                produto: material?.nome || 'Produto Não Cadastrado',
+                setor: material?.setor || operacao,
+                quantidade: material?.quantidade || 1,
+                tipo_operacao: operacao,
+                tipo_leitura: 'barcode',
+                timestamp: new Date().toISOString()
+            };
+
+            saveLeitura(leitura);
+            showResult('barcode', leitura);
+            showToast('Código de barras lido com sucesso!');
+        }
+
+        // Parse QR Content
+        function parseQRContent(content) {
+            const result = {};
+            content.split('\n').forEach(line => {
+                const [key, ...val] = line.split(':');
+                if (key && val.length) {
+                    const k = key.trim().toLowerCase()
+                        .replace('produto', 'produto')
+                        .replace('código', 'codigo')
+                        .replace('codigo', 'codigo');
+                    result[k] = val.join(':').trim();
+                }
+            });
+            return result;
+        }
+
+        // Show Result
+        function showResult(type, data) {
+            const container = document.getElementById(`result-${type}`);
+            const dataContainer = document.getElementById(`result-data-${type}`);
+            const messageEl = document.getElementById(`result-message-${type}`);
+
+            const messages = {
+                'Recebimento': 'Recebimento registrado com sucesso!',
+                'Expedição': 'Produto separado para envio!',
+                'Estoque': 'Produto identificado no estoque.',
+                'Logística Reversa': 'Produto retornado ao estoque.',
+                'Identificação': 'Material identificado!'
+            };
+
+            messageEl.textContent = messages[data.tipo_operacao] || 'Operação registrada';
+
+            dataContainer.innerHTML = `
+                <div class="result-item">
+                    <label>Produto</label>
+                    <p>${data.produto}</p>
+                </div>
+                <div class="result-item">
+                    <label>Código</label>
+                    <p class="mono">${data.codigo}</p>
+                </div>
+                <div class="result-item">
+                    <label>Setor</label>
+                    <p>${data.setor}</p>
+                </div>
+                <div class="result-item">
+                    <label>Quantidade</label>
+                    <p>${data.quantidade}</p>
+                </div>
+            `;
+
+            container.style.display = 'block';
+        }
+
+        // Storage functions
+        function saveLeitura(leitura) {
+            leituras.unshift(leitura);
+            localStorage.setItem(STORAGE.LEITURAS, JSON.stringify(leituras.slice(0, 100)));
+            updateStats();
+        }
+
+        function saveMateriais() {
+            localStorage.setItem(STORAGE.MATERIAIS, JSON.stringify(materiais));
+        }
+
+        // Render Histórico
+        function renderHistorico() {
+            const search = document.getElementById('search-historico').value.toLowerCase();
+            const tipo = document.getElementById('filter-tipo').value;
+
+            const filtered = leituras.filter(l => {
+                const matchSearch = !search || 
+                    l.codigo.toLowerCase().includes(search) ||
+                    l.produto.toLowerCase().includes(search);
+                const matchTipo = !tipo || l.tipo_leitura === tipo;
+                return matchSearch && matchTipo;
+            });
+
+            document.getElementById('historico-count').textContent = `${filtered.length} de ${leituras.length} registros`;
+
+            const tbody = document.getElementById('historico-table');
+            const empty = document.getElementById('historico-empty');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+                tbody.innerHTML = filtered.map(l => `
+                    <tr>
+                        <td><span class="badge badge-${l.tipo_operacao.toLowerCase().replace(' ', '-').replace('í', 'i').replace('ã', 'a')}">${l.tipo_leitura === 'qrcode' ? 'QR' : 'Barras'}</span></td>
+                        <td class="mono">${l.codigo}</td>
+                        <td>${l.produto}</td>
+                        <td><span class="badge badge-${getBadgeClass(l.tipo_operacao)}">${l.tipo_operacao}</span></td>
+                        <td>${l.setor}</td>
+                        <td>${formatDate(l.timestamp)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render Materiais
+        function renderMateriais() {
+            const search = document.getElementById('search-materiais').value.toLowerCase();
+
+            const filtered = materiais.filter(m => 
+                !search || 
+                m.nome.toLowerCase().includes(search) ||
+                m.codigo.toLowerCase().includes(search)
+            );
+
+            document.getElementById('materiais-count').textContent = `${filtered.length} materiais`;
+
+            document.getElementById('materiais-table').innerHTML = filtered.map(m => `
+                <tr>
+                    <td>
+                        <strong>${m.nome}</strong>
+                        ${m.localizacao ? `<br><small style="color: var(--muted)">${m.localizacao}</small>` : ''}
+                    </td>
+                    <td class="mono">${m.codigo}</td>
+                    <td>${m.setor}</td>
+                    <td>${m.quantidade}</td>
+                    <td><span class="badge badge-${getBadgeClass(m.tipo_operacao)}">${m.tipo_operacao}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="editMaterial('${m.id}')">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteMaterial('${m.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Material CRUD
+        function openMaterialModal(id = null) {
+            editingMaterialId = id;
+            const modal = document.getElementById('material-modal');
+            const form = document.getElementById('material-form');
+            
+            if (id) {
+                const m = materiais.find(mat => mat.id === id);
+                document.getElementById('modal-title').textContent = 'Editar Material';
+                document.getElementById('mat-nome').value = m.nome;
+                document.getElementById('mat-codigo').value = m.codigo;
+                document.getElementById('mat-quantidade').value = m.quantidade;
+                document.getElementById('mat-setor').value = m.setor;
+                document.getElementById('mat-operacao').value = m.tipo_operacao;
+                document.getElementById('mat-localizacao').value = m.localizacao || '';
+                document.getElementById('mat-descricao').value = m.descricao || '';
+            } else {
+                document.getElementById('modal-title').textContent = 'Novo Material';
+                form.reset();
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeMaterialModal() {
+            document.getElementById('material-modal').classList.remove('active');
+            editingMaterialId = null;
+        }
+
+        function saveMaterial(e) {
+            e.preventDefault();
+            
+            const material = {
+                id: editingMaterialId || Date.now().toString(),
+                nome: document.getElementById('mat-nome').value,
+                codigo: document.getElementById('mat-codigo').value,
+                quantidade: parseInt(document.getElementById('mat-quantidade').value) || 1,
+                setor: document.getElementById('mat-setor').value,
+                tipo_operacao: document.getElementById('mat-operacao').value,
+                localizacao: document.getElementById('mat-localizacao').value,
+                descricao: document.getElementById('mat-descricao').value
+            };
+
+            if (editingMaterialId) {
+                const idx = materiais.findIndex(m => m.id === editingMaterialId);
+                materiais[idx] = material;
+                showToast('Material atualizado!');
+            } else {
+                materiais.push(material);
+                showToast('Material cadastrado!');
+            }
+
+            saveMateriais();
+            closeMaterialModal();
+            renderMateriais();
+            updateStats();
+        }
+
+        function editMaterial(id) {
+            openMaterialModal(id);
+        }
+
+        function deleteMaterial(id) {
+            if (confirm('Excluir este material?')) {
+                materiais = materiais.filter(m => m.id !== id);
+                saveMateriais();
+                renderMateriais();
+                updateStats();
+                showToast('Material excluído!');
+            }
+        }
+
+        // Export CSV
+        function exportCSV() {
+            const headers = ['Tipo', 'Código', 'Produto', 'Operação', 'Setor', 'Data/Hora'];
+            const rows = leituras.map(l => [
+                l.tipo_leitura === 'qrcode' ? 'QR Code' : 'Código de Barras',
+                l.codigo,
+                l.produto,
+                l.tipo_operacao,
+                l.setor,
+                formatDate(l.timestamp)
+            ]);
+
+            const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `historico_leituras_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            showToast('CSV exportado!');
+        }
+
+        // Clear Histórico
+        function clearHistorico() {
+            if (confirm('Limpar todo o histórico?')) {
+                leituras = [];
+                localStorage.removeItem(STORAGE.LEITURAS);
+                renderHistorico();
+                updateStats();
+                showToast('Histórico limpo!');
+            }
+        }
+
+        // Update Stats
+        function updateStats() {
+            document.getElementById('stat-total').textContent = leituras.length;
+            document.getElementById('stat-qr').textContent = leituras.filter(l => l.tipo_leitura === 'qrcode').length;
+            document.getElementById('stat-barcode').textContent = leituras.filter(l => l.tipo_leitura === 'barcode').length;
+            document.getElementById('stat-materiais').textContent = materiais.length;
+        }
+
+        // Helpers
+        function getBadgeClass(operacao) {
+            const op = operacao.toLowerCase();
+            if (op.includes('recebimento')) return 'recebimento';
+            if (op.includes('expedi')) return 'expedicao';
+            if (op.includes('estoque')) return 'estoque';
+            if (op.includes('reversa')) return 'reversa';
+            if (op.includes('identifi')) return 'identificacao';
+            return 'identificacao';
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleString('pt-BR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

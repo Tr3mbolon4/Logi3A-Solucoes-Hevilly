@@ -138,7 +138,10 @@ export default function Materiais() {
         await createMaterial(formData);
         toast.success("Material cadastrado com sucesso!");
       }
-      handleCloseDialog();
+      // Close dialog and reset form
+      setIsDialogOpen(false);
+      setEditingMaterial(null);
+      setFormData(emptyMaterial);
     } catch (error) {
       toast.error("Erro ao salvar material");
       console.error(error);

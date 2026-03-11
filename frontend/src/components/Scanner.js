@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -31,6 +31,7 @@ import {
   ArrowLeft,
   RotateCcw,
   Zap,
+  SwitchCamera,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -43,15 +44,43 @@ const OPERACOES = [
 ];
 
 export function Scanner({ type = "qrcode", onScanComplete }) {
-  const scannerRef = useRef(null);
-  const html5QrcodeScannerRef = useRef(null);
+  const html5QrcodeRef = useRef(null);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [selectedOperacao, setSelectedOperacao] = useState("Identificação");
-  const [cameraStatus, setCameraStatus] = useState("idle"); // idle, starting, active, error
+  const [cameraStatus, setCameraStatus] = useState("idle");
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [permissionGranted, setPermissionGranted] = useState(false);
 
   const { createLeitura, findMaterialByCode, activityMode } = useApp();
+
+  // Get available cameras on mount
+  useEffect(() => {
+    const getCameras = async () => {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          setCameras(devices);
+          // Prefer back camera (environment facing)
+          const backCamera = devices.find(
+            (d) =>
+              d.label.toLowerCase().includes("back") ||
+              d.label.toLowerCase().includes("rear") ||
+              d.label.toLowerCase().includes("traseira") ||
+              d.label.toLowerCase().includes("environment")
+          );
+          setSelectedCamera(backCamera?.id || devices[devices.length - 1].id);
+          setPermissionGranted(true);
+        }
+      } catch (err) {
+        console.log("Error getting cameras:", err);
+        // Permission not granted yet, will request when starting
+      }
+    };
+    getCameras();
+  }, []);
 
   const handleScanSuccess = useCallback(
     async (decodedText) => {
@@ -59,12 +88,10 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
       if (result) return;
 
       playSuccessSound();
-      setCameraStatus("idle");
 
       let scanResult;
 
       if (type === "qrcode") {
-        // Parse QR Code content
         const parsed = parseQRContent(decodedText);
         scanResult = {
           codigo: parsed.codigo || decodedText,
@@ -76,7 +103,6 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
           raw: decodedText,
         };
       } else {
-        // Barcode - try to find material by code
         const material = findMaterialByCode(decodedText);
         scanResult = {
           codigo: decodedText,
@@ -89,31 +115,21 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
         };
       }
 
-      // Calculate points if in activity mode
       if (activityMode) {
         scanResult.pontuacao = calculatePoints(selectedOperacao);
       }
 
       setResult(scanResult);
 
-      // Save leitura
       try {
         await createLeitura(scanResult);
       } catch (err) {
         console.error("Error saving leitura:", err);
       }
 
-      // Stop scanner
-      if (html5QrcodeScannerRef.current) {
-        try {
-          html5QrcodeScannerRef.current.clear();
-        } catch (e) {
-          console.log("Scanner already cleared");
-        }
-      }
-      setScanning(false);
+      // Stop scanner after successful read
+      stopScanner();
 
-      // Callback
       if (onScanComplete) {
         onScanComplete(scanResult);
       }
@@ -121,18 +137,7 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
     [result, type, selectedOperacao, findMaterialByCode, activityMode, createLeitura, onScanComplete]
   );
 
-  const handleScanError = useCallback((errorMessage) => {
-    // Ignore common errors that happen during normal scanning
-    if (
-      errorMessage.includes("No MultiFormat Readers") ||
-      errorMessage.includes("NotFoundException")
-    ) {
-      return;
-    }
-    console.log("Scan error:", errorMessage);
-  }, []);
-
-  const startScanner = useCallback(() => {
+  const startScanner = useCallback(async () => {
     if (scanning) return;
 
     setResult(null);
@@ -140,49 +145,98 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
     setScanning(true);
     setCameraStatus("starting");
 
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-      if (!scannerRef.current) {
-        setError("Elemento do scanner não encontrado");
-        setScanning(false);
-        setCameraStatus("error");
-        return;
+    try {
+      // Create scanner instance if not exists
+      if (!html5QrcodeRef.current) {
+        html5QrcodeRef.current = new Html5Qrcode("qr-reader", {
+          verbose: false,
+        });
       }
 
-      try {
-        const config = {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-          rememberLastUsedCamera: true,
-          showTorchButtonIfSupported: true,
-        };
+      // Configuration for scanning
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
+      };
 
-        html5QrcodeScannerRef.current = new Html5QrcodeScanner(
-          "qr-reader",
+      // Try to use back camera first (environment facing)
+      let cameraId = selectedCamera;
+      
+      if (!cameraId) {
+        // Request camera permission and get cameras
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          setCameras(devices);
+          // Find back camera
+          const backCamera = devices.find(
+            (d) =>
+              d.label.toLowerCase().includes("back") ||
+              d.label.toLowerCase().includes("rear") ||
+              d.label.toLowerCase().includes("traseira") ||
+              d.label.toLowerCase().includes("environment")
+          );
+          cameraId = backCamera?.id || devices[devices.length - 1].id;
+          setSelectedCamera(cameraId);
+          setPermissionGranted(true);
+        }
+      }
+
+      if (!cameraId) {
+        // Fallback to facingMode if no camera ID
+        await html5QrcodeRef.current.start(
+          { facingMode: "environment" },
           config,
-          false
+          handleScanSuccess,
+          (errorMessage) => {
+            // Ignore normal scanning errors
+            if (!errorMessage.includes("NotFoundException")) {
+              console.log("Scan error:", errorMessage);
+            }
+          }
         );
-
-        html5QrcodeScannerRef.current.render(handleScanSuccess, handleScanError);
-        setCameraStatus("active");
-      } catch (err) {
-        console.error("Error starting scanner:", err);
-        setError("Erro ao iniciar câmera. Verifique as permissões.");
-        setScanning(false);
-        setCameraStatus("error");
-        playErrorSound();
+      } else {
+        await html5QrcodeRef.current.start(
+          cameraId,
+          config,
+          handleScanSuccess,
+          (errorMessage) => {
+            if (!errorMessage.includes("NotFoundException")) {
+              console.log("Scan error:", errorMessage);
+            }
+          }
+        );
       }
-    }, 100);
-  }, [scanning, handleScanSuccess, handleScanError]);
 
-  const stopScanner = useCallback(() => {
-    if (html5QrcodeScannerRef.current) {
+      setCameraStatus("active");
+    } catch (err) {
+      console.error("Error starting scanner:", err);
+      
+      let errorMsg = "Erro ao iniciar câmera.";
+      if (err.message?.includes("Permission")) {
+        errorMsg = "Permissão de câmera negada. Por favor, permita o acesso à câmera nas configurações do navegador.";
+      } else if (err.message?.includes("NotFound")) {
+        errorMsg = "Nenhuma câmera encontrada no dispositivo.";
+      } else if (err.message?.includes("NotReadable")) {
+        errorMsg = "Câmera em uso por outro aplicativo.";
+      }
+      
+      setError(errorMsg);
+      setScanning(false);
+      setCameraStatus("error");
+      playErrorSound();
+    }
+  }, [scanning, selectedCamera, handleScanSuccess]);
+
+  const stopScanner = useCallback(async () => {
+    if (html5QrcodeRef.current) {
       try {
-        html5QrcodeScannerRef.current.clear();
+        const state = html5QrcodeRef.current.getState();
+        if (state === 2) { // SCANNING state
+          await html5QrcodeRef.current.stop();
+        }
       } catch (e) {
-        console.log("Error clearing scanner:", e);
+        console.log("Error stopping scanner:", e);
       }
     }
     setScanning(false);
@@ -195,12 +249,32 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
     startScanner();
   }, [startScanner]);
 
+  const switchCamera = useCallback(async () => {
+    if (cameras.length < 2) return;
+    
+    const currentIndex = cameras.findIndex((c) => c.id === selectedCamera);
+    const nextIndex = (currentIndex + 1) % cameras.length;
+    const nextCamera = cameras[nextIndex];
+    
+    setSelectedCamera(nextCamera.id);
+    
+    if (scanning) {
+      await stopScanner();
+      setTimeout(() => {
+        startScanner();
+      }, 300);
+    }
+  }, [cameras, selectedCamera, scanning, stopScanner, startScanner]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (html5QrcodeScannerRef.current) {
+      if (html5QrcodeRef.current) {
         try {
-          html5QrcodeScannerRef.current.clear();
+          const state = html5QrcodeRef.current.getState();
+          if (state === 2) {
+            html5QrcodeRef.current.stop();
+          }
         } catch (e) {
           console.log("Cleanup error:", e);
         }
@@ -258,7 +332,7 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
                   {type === "qrcode" ? "Leitor de QR Code" : "Leitor de Código de Barras"}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Aponte a câmera para o código
+                  Aponte a câmera traseira para o código
                 </p>
               </div>
             </div>
@@ -300,18 +374,38 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
                   Iniciar Câmera
                 </Button>
               ) : (
-                <Button
-                  variant="destructive"
-                  onClick={stopScanner}
-                  className="gap-2"
-                  data-testid="stop-scanner-btn"
-                >
-                  <CameraOff className="w-4 h-4" />
-                  Parar
-                </Button>
+                <>
+                  {cameras.length > 1 && (
+                    <Button
+                      variant="outline"
+                      onClick={switchCamera}
+                      className="gap-2"
+                      data-testid="switch-camera-btn"
+                    >
+                      <SwitchCamera className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="destructive"
+                    onClick={stopScanner}
+                    className="gap-2"
+                    data-testid="stop-scanner-btn"
+                  >
+                    <CameraOff className="w-4 h-4" />
+                    Parar
+                  </Button>
+                </>
               )}
             </div>
           </div>
+          
+          {/* Camera info */}
+          {permissionGranted && cameras.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Câmera: {cameras.find((c) => c.id === selectedCamera)?.label || "Padrão"} 
+              {cameras.length > 1 && ` (${cameras.length} disponíveis)`}
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -319,11 +413,11 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           <div className="relative bg-secondary/5 min-h-[300px]">
-            {/* Scanner container */}
+            {/* Scanner container - always visible for html5-qrcode */}
             <div
               id="qr-reader"
-              ref={scannerRef}
-              className={`w-full ${!scanning ? "hidden" : ""}`}
+              className={`w-full ${!scanning && !result ? "hidden" : ""}`}
+              style={{ minHeight: scanning ? "300px" : "0" }}
             />
 
             {/* Placeholder when not scanning */}
@@ -339,19 +433,23 @@ export function Scanner({ type = "qrcode", onScanComplete }) {
                   Clique em "Iniciar Câmera" para começar a leitura do{" "}
                   {type === "qrcode" ? "QR Code" : "código de barras"}
                 </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  A câmera traseira será utilizada automaticamente
+                </p>
               </div>
             )}
 
             {/* Error message */}
             {error && (
               <div className="absolute inset-0 flex items-center justify-center bg-destructive/5 p-4">
-                <div className="text-center">
+                <div className="text-center max-w-sm">
                   <XCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-                  <p className="text-destructive font-medium">{error}</p>
+                  <p className="text-destructive font-medium mb-2">Erro</p>
+                  <p className="text-sm text-muted-foreground mb-4">{error}</p>
                   <Button
                     variant="outline"
                     onClick={resetScanner}
-                    className="mt-4 gap-2"
+                    className="gap-2"
                   >
                     <RotateCcw className="w-4 h-4" />
                     Tentar novamente

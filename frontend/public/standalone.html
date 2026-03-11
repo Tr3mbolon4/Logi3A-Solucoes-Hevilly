@@ -1026,22 +1026,55 @@
         }
 
         // QR Scanner
-        function startQRScanner() {
+        async function startQRScanner() {
             const container = document.getElementById('qr-reader-container');
             container.innerHTML = '<div id="qr-reader"></div>';
             
             document.getElementById('start-qr-btn').style.display = 'none';
             document.getElementById('stop-qr-btn').style.display = 'inline-flex';
             document.getElementById('status-qr').classList.add('active');
-            document.getElementById('status-text-qr').textContent = 'Câmera ativa';
+            document.getElementById('status-text-qr').textContent = 'Iniciando...';
 
-            qrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-            qrScanner.render(onQRScanSuccess, () => {});
+            try {
+                qrScanner = new Html5Qrcode("qr-reader");
+                
+                // Try to get back camera
+                const devices = await Html5Qrcode.getCameras();
+                let cameraId = null;
+                
+                if (devices && devices.length > 0) {
+                    const backCamera = devices.find(d => 
+                        d.label.toLowerCase().includes('back') || 
+                        d.label.toLowerCase().includes('rear') ||
+                        d.label.toLowerCase().includes('traseira')
+                    );
+                    cameraId = backCamera?.id || devices[devices.length - 1].id;
+                }
+                
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                
+                if (cameraId) {
+                    await qrScanner.start(cameraId, config, onQRScanSuccess, () => {});
+                } else {
+                    await qrScanner.start({ facingMode: "environment" }, config, onQRScanSuccess, () => {});
+                }
+                
+                document.getElementById('status-text-qr').textContent = 'Câmera ativa';
+            } catch (err) {
+                console.error('Erro ao iniciar scanner:', err);
+                document.getElementById('status-text-qr').textContent = 'Erro na câmera';
+                document.getElementById('status-qr').classList.remove('active');
+                showToast('Erro ao acessar câmera. Verifique as permissões.', 'error');
+            }
         }
 
-        function stopQRScanner() {
+        async function stopQRScanner() {
             if (qrScanner) {
-                qrScanner.clear();
+                try {
+                    await qrScanner.stop();
+                } catch (e) {
+                    console.log('Erro ao parar scanner:', e);
+                }
                 qrScanner = null;
             }
             document.getElementById('qr-reader-container').innerHTML = '';
@@ -1080,33 +1113,66 @@
         }
 
         // Barcode Scanner
-        function startBarcodeScanner() {
+        async function startBarcodeScanner() {
             const container = document.getElementById('barcode-reader-container');
             container.innerHTML = '<div id="barcode-reader"></div>';
             
             document.getElementById('start-barcode-btn').style.display = 'none';
             document.getElementById('stop-barcode-btn').style.display = 'inline-flex';
             document.getElementById('status-barcode').classList.add('active');
-            document.getElementById('status-text-barcode').textContent = 'Câmera ativa';
+            document.getElementById('status-text-barcode').textContent = 'Iniciando...';
 
-            barcodeScanner = new Html5QrcodeScanner("barcode-reader", { 
-                fps: 10, 
-                qrbox: { width: 300, height: 150 },
-                formatsToSupport: [ 
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E
-                ]
-            });
-            barcodeScanner.render(onBarcodeScanSuccess, () => {});
+            try {
+                barcodeScanner = new Html5Qrcode("barcode-reader");
+                
+                // Try to get back camera
+                const devices = await Html5Qrcode.getCameras();
+                let cameraId = null;
+                
+                if (devices && devices.length > 0) {
+                    const backCamera = devices.find(d => 
+                        d.label.toLowerCase().includes('back') || 
+                        d.label.toLowerCase().includes('rear') ||
+                        d.label.toLowerCase().includes('traseira')
+                    );
+                    cameraId = backCamera?.id || devices[devices.length - 1].id;
+                }
+                
+                const config = { 
+                    fps: 10, 
+                    qrbox: { width: 300, height: 150 },
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E
+                    ]
+                };
+                
+                if (cameraId) {
+                    await barcodeScanner.start(cameraId, config, onBarcodeScanSuccess, () => {});
+                } else {
+                    await barcodeScanner.start({ facingMode: "environment" }, config, onBarcodeScanSuccess, () => {});
+                }
+                
+                document.getElementById('status-text-barcode').textContent = 'Câmera ativa';
+            } catch (err) {
+                console.error('Erro ao iniciar scanner:', err);
+                document.getElementById('status-text-barcode').textContent = 'Erro na câmera';
+                document.getElementById('status-barcode').classList.remove('active');
+                showToast('Erro ao acessar câmera. Verifique as permissões.', 'error');
+            }
         }
 
-        function stopBarcodeScanner() {
+        async function stopBarcodeScanner() {
             if (barcodeScanner) {
-                barcodeScanner.clear();
+                try {
+                    await barcodeScanner.stop();
+                } catch (e) {
+                    console.log('Erro ao parar scanner:', e);
+                }
                 barcodeScanner = null;
             }
             document.getElementById('barcode-reader-container').innerHTML = '';

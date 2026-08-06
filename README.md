@@ -1,107 +1,86 @@
-# Logi3A Soluções
+# Logi3A Solucoes Educacionais
 
-Aplicação educacional com frontend em React + CRACO e backend em FastAPI para cadastro/login, gerenciamento de materiais, leitura de códigos, registro de atividades e estatísticas.
+Aplicacao educacional para organizar materiais, atividades, leitura de codigos e acompanhamento de aprendizagem em ambiente web.
 
-## Estrutura
+## Visao Geral
 
-- `frontend/`: interface React.
-- `backend/`: API FastAPI.
+O projeto combina frontend React com backend FastAPI para apoiar rotinas educacionais. A estrutura do repositorio indica telas para aluno, professor, materiais, historico, dashboard, geracao/leitura de QR Code e codigo de barras.
 
-## Requisitos
+## Problema Resolvido
 
-- Node.js 20+
-- npm 10+
-- Python 3.11+
+Instituicoes, professores ou equipes de treinamento precisam organizar materiais e acompanhar interacoes dos alunos de forma simples. Este projeto propõe uma experiencia web para centralizar conteudos, leituras, atividades e estatisticas em um unico fluxo.
 
-## Variáveis de ambiente
+## Beneficios
 
-### Frontend
+- Centraliza materiais e atividades em uma interface web.
+- Apoia acompanhamento de alunos e professores.
+- Usa QR Code e codigo de barras para conectar materiais fisicos ou identificadores digitais ao sistema.
+- Facilita consultas de historico e estatisticas.
 
-Crie `frontend/.env` a partir de [`frontend/.env.example`](./frontend/.env.example):
+## Principais Funcionalidades
 
-```env
-REACT_APP_BACKEND_URL=http://localhost:8000
+### Funcionalidades Disponiveis
+
+- Cadastro e login de usuarios.
+- Paineis para aluno e professor.
+- Gestao de materiais.
+- Geracao e leitura de QR Code.
+- Leitura de codigo de barras.
+- Registro de atividades e leituras.
+- Dashboard e historico.
+- Backend com suporte a MongoDB e banco em memoria para desenvolvimento local.
+
+### Funcionalidades Planejadas
+
+- Nao ha roadmap publico consolidado no conteudo atual.
+
+## Como Funciona
+
+```text
+Usuario acessa a plataforma
+-> realiza login
+-> consulta ou gerencia materiais
+-> usa leitura de QR Code ou codigo de barras
+-> atividades e leituras sao registradas
+-> dashboards e historicos apoiam o acompanhamento
 ```
 
-### Backend
+## Tecnologias Utilizadas
 
-Crie `backend/.env` a partir de [`backend/.env.example`](./backend/.env.example):
+- Python
+- FastAPI
+- MongoDB
+- React
+- JavaScript
+- Tailwind CSS
+- html5-qrcode
+- qrcode.react
 
-```env
-MONGO_URL=mongodb://localhost:27017
-DB_NAME=logi3a
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-USE_MOCK_DB=true
+## Arquitetura
+
+```mermaid
+flowchart LR
+    Usuario["Aluno / Professor"] --> Frontend["Frontend React"]
+    Frontend --> Scanner["QR Code / Codigo de barras"]
+    Frontend --> API["API FastAPI"]
+    API --> Banco["MongoDB ou banco em memoria"]
 ```
 
-Observações:
+## Estrutura Do Projeto
 
-- Se `USE_MOCK_DB=true` ou se o Mongo não responder no startup, a API usa um banco em memória para facilitar o desenvolvimento local.
-- Em modo memória, os dados são perdidos ao reiniciar o backend.
+- `frontend/`: interface web, paginas, componentes e contexto da aplicacao.
+- `backend/`: API, rotas, uploads e dependencias Python.
+- `memory/` e `test_reports/`: artefatos de acompanhamento do projeto.
+- `tests/`: estrutura auxiliar de testes.
 
-## Como rodar
+## Status
 
-### 1. Backend
+Projeto educacional em desenvolvimento/manutencao. O conteudo atual confirma estrutura funcional, mas nao confirma uso em producao.
 
-```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-Copy-Item .env.example .env
-uvicorn server:app --reload --host 0.0.0.0 --port 8000
-```
+## Minha Participacao
 
-### 2. Frontend
+Desenvolvimento e organizacao de uma solucao educacional com foco em experiencia web, automacao de leitura por codigos e acompanhamento de atividades.
 
-```powershell
-cd frontend
-npm install
-Copy-Item .env.example .env
-npm start
-```
+## Autor
 
-Frontend: `http://localhost:3000`  
-Backend: `http://localhost:8000`
-
-## Seed de dados
-
-Você pode popular o sistema de duas formas:
-
-- usar os botões de demo na tela de login, que disparam o seed automaticamente
-- chamar a API manualmente:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/seed
-```
-
-## Fluxo principal validado no código
-
-1. Cadastro e login de aluno/professor em `/login`
-2. Seed de dados demo
-3. CRUD de materiais em `/materiais`
-4. Leitura de QR Code ou código de barras
-5. Registro automático de `leituras` e `atividades` para aluno logado
-6. Estatísticas em `/dashboard` e `/professor`
-
-## Credenciais demo
-
-- Professor: `Professor Demo` / `123456`
-- Aluno: `Aluno Demo` / `123456`
-
-## Ajustes feitos
-
-- correção da árvore de dependências do frontend para instalação e build com CRA/CRACO
-- fallback seguro para `REACT_APP_BACKEND_URL` no frontend
-- carregamento automático de materiais em telas que dependem deles
-- registro automático de atividades a partir do scanner, além das leituras
-- atualização do dashboard para buscar leituras recentes
-- limpeza dos warnings de build do frontend
-- simplificação do `requirements.txt` do backend para o fluxo real do projeto
-- fallback do backend para banco em memória quando `MONGO_URL` não estiver configurado
-- configuração de CORS local padrão
-- criação de `.env.example` para frontend e backend
-
-## Limitação encontrada neste ambiente
-
-Neste workspace, a instalação do backend não pôde ser concluída porque o `pip` está bloqueado por proxy e retorna `407 Proxy Authentication Required` para o PyPI. O frontend foi instalado e buildado com sucesso; a parte do backend foi preparada para execução local, mas a validação final da API depende de um ambiente com acesso ao PyPI.
+Desenvolvido por Michele Santana — Kalion Tecnologia
